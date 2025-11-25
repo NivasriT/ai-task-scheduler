@@ -45,14 +45,18 @@ set -e
 # Activate the virtual environment
 source /opt/render/project/venv/bin/activate
 
+# Change to the backend directory
+cd /opt/render/project/src/backend
+
 # Debug info
 echo "=== Starting application ==="
 echo "Current directory: $(pwd)"
 echo "Python path: $(which python)"
 echo "Gunicorn path: $(which gunicorn)"
+echo "Files in current directory: $(ls -la)"
 
-# Run gunicorn using the Python module syntax
-exec python -m gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 app:app
+# Run gunicorn using the application factory pattern
+exec gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 "app:create_app()"
 EOL
 
 chmod +x start.sh
