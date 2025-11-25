@@ -28,13 +28,9 @@ def create_app():
     jwt.init_app(app)
     CORS(app)
     
-    # Register blueprints
-    from .routes import main, auth, tasks, scheduler, analytics
-    app.register_blueprint(main.bp)
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(tasks.bp)
-    app.register_blueprint(scheduler.bp)
-    app.register_blueprint(analytics.bp)
+    # Import and register blueprints
+    from .routes import register_blueprints
+    register_blueprints(app)
     
     # Create database tables
     with app.app_context():
