@@ -6,38 +6,55 @@ set -x  # Enable debug output
 echo "=== Environment Variables ==="
 printenv | sort
 
-# Create virtual environment in the default Render location
+# Set paths
 RENDER_VENV_DIR="/opt/render/project/venv"
-echo "=== Creating virtual environment in $RENDER_VENV_DIR ==="
-python -m venv $RENDER_VENV_DIR
+APP_DIR="$(pwd)"
+
+# Create and activate virtual environment
+echo "=== Setting up Python environment in $RENDER_VENV_DIR ==="
+python3 -m venv $RENDER_VENV_DIR
 source $RENDER_VENV_DIR/bin/activate
 
 # Set Python path
-export PYTHONPATH="$PYTHONPATH:$(pwd)"
+export PYTHONPATH="$PYTHONPATH:$APP_DIR"
 
 # Upgrade pip and setuptools
 echo "=== Upgrading pip and setuptools ==="
-pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip setuptools wheel
 
 # Install gunicorn first with explicit version
 echo "=== Installing gunicorn ==="
-pip install --no-cache-dir gunicorn==21.2.0
+python -m pip install --no-cache-dir gunicorn==21.2.0
 
 # Install requirements with verbose output
 echo "=== Installing requirements ==="
-pip install --no-cache-dir -r requirements.txt
+python -m pip install --no-cache-dir -r requirements.txt
 
 # Verify installations
 echo "=== Verifying installations ==="
-which python || echo "Python not found"
-which pip || echo "Pip not found"
-which gunicorn || echo "Gunicorn not in PATH"
+ls -la $RENDER_VENV_DIR/bin/ || echo "Virtual environment bin directory not found"
+ls -la $RENDER_VENV_DIR/bin/gunicorn || echo "Gunicorn binary not found"
+$RENDER_VENV_DIR/bin/python -c "import gunicorn; print(f'Gunicorn version: {gunicorn.__version__}')" || echo "Failed to import gunicorn"
 
-# Create a start script that uses the correct Python and Gunicorn paths
-echo '#!/bin/bash
+# Create start script
+echo "=== Creating start script ==="
+cat > start.sh << 'EOL'
+#!/bin/bash
+set -e
+
+# Activate the virtual environment
 source /opt/render/project/venv/bin/activate
-exec gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 app:app
-' > start.sh
+
+# Debug info
+echo "=== Starting application ==="
+echo "Current directory: $(pwd)"
+echo "Python path: $(which python)"
+echo "Gunicorn path: $(which gunicorn)"
+
+# Run gunicorn using the Python module syntax
+exec python -m gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 app:app
+EOL
+
 chmod +x start.sh
 
 # Print debug information
@@ -45,13 +62,13 @@ echo "=== Setup completed ==="
 echo "Current directory: $(pwd)"
 echo "Python path: $(which python)"
 echo "Pip path: $(which pip)"
-echo "Gunicorn path: $(which gunicorn)"
+$RENDER_VENV_DIR/bin/python -c "import sys; print('\n'.join(sys.path))"
 
 # List installed packages for debugging
-echo "=== Installed packages ==="
-pip list
+echo "=== Installed packages in $RENDER_VENV_DIR ==="
+$RENDER_VENV_DIR/bin/pip list
 
-# Create a symlink to the virtual environment in the project directory
-ln -s $RENDER_VENV_DIR venv || echo "Failed to create venv symlink"
+# Create a symlink for backward compatibility
+ln -sf $RENDER_VENV_DIR venv || echo "Failed to create venv symlink"
 
 exit 0
