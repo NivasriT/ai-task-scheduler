@@ -6,10 +6,11 @@ set -x  # Enable debug output
 echo "=== Environment Variables ==="
 printenv | sort
 
-# Create and activate virtual environment
-echo "=== Setting up Python environment ==="
-python3 -m venv venv
-source venv/bin/activate
+# Create virtual environment in the default Render location
+RENDER_VENV_DIR="/opt/render/project/venv"
+echo "=== Creating virtual environment in $RENDER_VENV_DIR ==="
+python -m venv $RENDER_VENV_DIR
+source $RENDER_VENV_DIR/bin/activate
 
 # Set Python path
 export PYTHONPATH="$PYTHONPATH:$(pwd)"
@@ -26,16 +27,18 @@ pip install --no-cache-dir gunicorn==21.2.0
 echo "=== Installing requirements ==="
 pip install --no-cache-dir -r requirements.txt
 
-# Explicitly install flask-cors to ensure it's available
-echo "=== Installing Flask-CORS ==="
-pip install --no-cache-dir flask-cors==4.0.0
-
 # Verify installations
 echo "=== Verifying installations ==="
 which python || echo "Python not found"
 which pip || echo "Pip not found"
 which gunicorn || echo "Gunicorn not in PATH"
-pip list | grep -E "flask|gunicorn" || echo "Required packages not found"
+
+# Create a start script that uses the correct Python and Gunicorn paths
+echo '#!/bin/bash
+source /opt/render/project/venv/bin/activate
+exec gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 app:app
+' > start.sh
+chmod +x start.sh
 
 # Print debug information
 echo "=== Setup completed ==="
@@ -43,10 +46,12 @@ echo "Current directory: $(pwd)"
 echo "Python path: $(which python)"
 echo "Pip path: $(which pip)"
 echo "Gunicorn path: $(which gunicorn)"
-echo "Python module path: $(python -c 'import sys; print("\n".join(sys.path))')"
 
 # List installed packages for debugging
 echo "=== Installed packages ==="
 pip list
+
+# Create a symlink to the virtual environment in the project directory
+ln -s $RENDER_VENV_DIR venv || echo "Failed to create venv symlink"
 
 exit 0
