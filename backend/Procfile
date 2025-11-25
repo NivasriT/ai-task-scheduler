@@ -1,1 +1,1 @@
-web: chmod +x setup.sh && ./setup.sh && /opt/render/project/venv/bin/gunicorn --bind 0.0.0.0:$PORT --timeout 600 app:app
+web: chmod +x setup.sh && ./setup.sh && python -m gunicorn --bind 0.0.0.0:$PORT --timeout 600 app:app
