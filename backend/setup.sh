@@ -7,12 +7,24 @@ apt-get update
 echo "Installing build dependencies..."
 apt-get install -y --no-install-recommends \
     gcc \
-    python3-dev
+    python3-dev \
+    python3-pip
 
 # Install Python dependencies
 echo "Upgrading pip..."
-python -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
+
+# Install gunicorn first
+echo "Installing gunicorn..."
+pip3 install gunicorn==21.2.0
+
+# Install requirements
 echo "Installing requirements..."
-pip install --no-cache-dir -r requirements.txt
+pip3 install --no-cache-dir -r requirements.txt
+
+# Verify installations
+echo "Verifying installations..."
+which gunicorn
+python3 -m pip list | grep gunicorn
 
 echo "Setup completed successfully!"
