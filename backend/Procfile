@@ -1,1 +1,1 @@
-web: ./start.sh --workers 4 app:app
+web: ./venv/bin/gunicorn --bind 0.0.0.0:$PORT --timeout 600 --workers 4 app:app
