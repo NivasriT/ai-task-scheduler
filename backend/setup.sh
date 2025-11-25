@@ -20,7 +20,7 @@ pip install --upgrade pip setuptools wheel
 
 # Install gunicorn first with explicit version
 echo "=== Installing gunicorn ==="
-pip install --no-cache-dir --user gunicorn==21.2.0
+pip install --no-cache-dir gunicorn==21.2.0
 
 # Install requirements with verbose output
 echo "=== Installing requirements ==="
