@@ -13,5 +13,4 @@ python-dateutil==2.8.2
 Flask-Migrate==4.0.5
 blis==0.7.10
 thinc==8.1.12
-blis==0.7.10
-thinc==8.1.12
+psycopg2-binary==2.9.9

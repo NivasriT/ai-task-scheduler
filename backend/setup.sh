@@ -53,7 +53,10 @@ echo "=== Starting application ==="
 echo "Current directory: $(pwd)"
 echo "Python path: $(which python)"
 echo "Gunicorn path: $(which gunicorn)"
-echo "Files in current directory: $(ls -la)"
+echo "Installed packages:"
+pip list
+echo "Files in current directory:"
+ls -la
 
 # Run gunicorn using the application factory pattern
 exec gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 "app:create_app()"
