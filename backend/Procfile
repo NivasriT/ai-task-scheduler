@@ -1,1 +1,1 @@
-web: gunicorn --bind 0.0.0.0:$PORT app:app --timeout 600
+web: chmod +x setup.sh && ./setup.sh && /opt/render/project/start.sh
