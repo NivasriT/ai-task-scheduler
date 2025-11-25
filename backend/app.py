@@ -29,7 +29,7 @@ def create_app():
     CORS(app)
     
     # Import and register blueprints
-    from .routes import register_blueprints
+    from routes import register_blueprints
     register_blueprints(app)
     
     # Create database tables

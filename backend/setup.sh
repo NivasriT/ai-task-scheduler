@@ -58,8 +58,11 @@ pip list
 echo "Files in current directory:"
 ls -la
 
-# Run gunicorn using the application factory pattern
-exec gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 "app:create_app()"
+# Set Python path to include the current directory
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+# Run gunicorn using the application factory pattern with Python module syntax
+exec python -m gunicorn --bind 0.0.0.0:${PORT:-10000} --timeout 600 --workers 4 "app:create_app()"
 EOL
 
 chmod +x start.sh
